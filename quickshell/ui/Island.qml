@@ -111,9 +111,6 @@ Variants {
                 Clock {
                     visible: root.mode === IslandMode.clock
                 }
-                Clock2 {
-                    visible: root.mode === IslandMode.clock2
-                }
                 ActionBar {
                     visible: root.mode === IslandMode.actionBar
                 }

@@ -12,8 +12,8 @@ FocusScope {
     implicitWidth: 500
     implicitHeight: layout.implicitHeight
 
-    property string mode: "launcher"
-    property var allEntires: {
+    property string mode: input.text.startsWith("=") ? "calc" : "launcher"
+    property var allEntries: {
         var entries = [];
 
         if (root.mode === "launcher") {
@@ -32,7 +32,58 @@ FocusScope {
         return entries;
     }
 
-    property var filteredEntries: mode === "launcher" ? allEntires.filter(a => a.name.toLowerCase().includes(input.text)) : allEntires
+    property var filteredEntries: {
+        if (mode === "launcher") {
+            const filtered = allEntries.filter(a => a.name.toLowerCase().includes(input.text.toLowerCase()));
+            if (filtered.length === 0) {
+                list.currentIndex = -1;
+                return [
+                    {
+                        icon: "help-circle",
+                        name: "No items",
+                        comment: "",
+                        entry: null
+                    }
+                ];
+            }
+
+            list.currentIndex = 0;
+            return filtered;
+        } else if (mode === "calc") {
+            const expr = input.text.substring(1);
+            if (expr.length === 0) {
+                return [
+                    {
+                        icon: "=",
+                        name: "Start calculating..."
+                    }
+                ];
+            }
+
+            try {
+                const result = eval(expr);
+
+                return [
+                    {
+                        icon: "󰇼",
+                        name: result.toString(),
+                        comment: expr,
+                        entry: null
+                    }
+                ];
+            } catch (e) {
+                return [
+                    {
+                        icon: "",
+                        name: "Invalid expression",
+                        comment: e.toString(),
+                        entry: null
+                    }
+                ];
+            }
+        }
+        return allEntries;
+    }
 
     ScriptModel {
         id: filteredModel
@@ -53,8 +104,11 @@ FocusScope {
     }
 
     onVisibleChanged: {
-        if (visible)
+        if (visible) {
             forceFocus.start();
+            list.currentIndex = 0;
+            input.text = "";
+        }
     }
 
     Component.onCompleted: {
@@ -242,6 +296,7 @@ FocusScope {
 
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        visible: root.mode === "launcher" && modelData.icon !== "help-circle"
 
                         onClicked: {
                             list.currentIndex = index;
@@ -259,9 +314,19 @@ FocusScope {
                             height: 36
 
                             color: Theme.transparent
+                            Text {
+                                anchors.centerIn: parent
+                                visible: root.mode === "calc"
 
+                                text: "="
+                                font.family: "JetBrainsMono Nerd Font Propo"
+                                font.pixelSize: 28
+
+                                color: Theme.background
+                            }
                             Image {
                                 anchors.centerIn: parent
+                                visible: root.mode !== "calc"
                                 width: 34
                                 height: 34
 
@@ -279,7 +344,7 @@ FocusScope {
                                 text: modelData.name
 
                                 font.pixelSize: 13
-                                color: Theme.text
+                                color: root.mode === "calc" ? Theme.background : Theme.text
                             }
 
                             Text {
@@ -288,7 +353,7 @@ FocusScope {
                                 text: modelData.comment
 
                                 font.pixelSize: 10
-                                color: Theme.placeholder
+                                color: root.mode === "calc" ? Theme.background : Theme.placeholder
                             }
                         }
                     }
