@@ -53,8 +53,7 @@ end
 
 hl.bind(SUPER .. " + S", hl.dsp.workspace.toggle_special("spw1"))
 
-hl.bind(SUPER .. " + SHIFT + A", hl.dsp.window.move({ workspace = "special:spw1" }))
-hl.bind(SUPER .. " + ALT + S", hl.dsp.window.move({ workspace = "special:spw2" }))
+hl.bind(SUPER .. " + ALT + S", hl.dsp.window.move({ workspace = "special:spw1" }))
 
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(
